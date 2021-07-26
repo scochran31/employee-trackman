@@ -1,7 +1,3 @@
-DROP DATABASE IF EXISTS trackman;
-CREATE DATABASE trackman;
-USE trackman;
-
 DROP TABLE IF EXISTS department;
 DROP TABLE IF EXISTS employee_role;
 DROP TABLE IF EXISTS employee;

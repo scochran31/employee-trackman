@@ -1,19 +1,12 @@
-const mysql = require('mysql2');
 const { prompt } = require('inquirer');
 const table = require('console.table');
-require('dotenv').config();
+const db = require('./db/connection');
 
-// Connect to our database
-const db = mysql.createConnection(
-    {
-        host: 'localhost',
-        user: 'root',
-        password: process.env.DB_PASS,
-        database: 'trackman'
-    },
-    console.log('Now connected to the trackman database!'),
-    firstPrompt()
-);
+db.connect(err => {
+    if (err) throw err;
+    console.log('Connected to the trackman database!');
+    firstPrompt();
+});
 
 function firstPrompt() {
     prompt([
@@ -28,9 +21,46 @@ function firstPrompt() {
                 'Update an employee',
                 'Add an employee',
                 'Delete an employee',
-                'Add a role',
+                'Add an employee role',
                 'Add a department'
             ],
-        },
+
+        }.then(response => {
+            {
+                switch (response.choice) {
+                    case 'View all departments':
+                        viewDepartments();
+                        break;
+
+                    case 'View all employee roles':
+                        viewEmployeeRoles();
+                        break;
+
+                    case 'View all employees':
+                        viewAllEmployees();
+                        break;
+
+                    case 'Update an employee':
+                        updateEmployee();
+                        break;
+
+                    case 'Add an Employee':
+                        addEmployee();
+                        break;
+
+                    case 'Delete an employee':
+                        deleteEmployee();
+                        break;
+
+                    case 'Add an employee role':
+                        addEmployeeRole();
+                        break;
+
+                    case 'Add a department':
+                        addDepartment();
+                        break;
+                }
+            }
+        })
     ])
 }
