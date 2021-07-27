@@ -25,42 +25,64 @@ function firstPrompt() {
                 'Add a department'
             ],
 
-        }.then(response => {
-            {
-                switch (response.choice) {
-                    case 'View all departments':
-                        viewDepartments();
-                        break;
+        }
+    ]).then(response => {
+        {
+            switch (response.choice) {
+                case 'View all departments':
+                    viewDepartments();
+                    break;
 
-                    case 'View all employee roles':
-                        viewEmployeeRoles();
-                        break;
+                case 'View all employee roles':
+                    viewRole();
+                    break;
 
-                    case 'View all employees':
-                        viewAllEmployees();
-                        break;
+                case 'View all employees':
+                    viewAllEmployees();
+                    break;
 
-                    case 'Update an employee':
-                        updateEmployee();
-                        break;
+                case 'Update an employee':
+                    updateEmployee();
+                    break;
 
-                    case 'Add an Employee':
-                        addEmployee();
-                        break;
+                case 'Add an Employee':
+                    addEmployee();
+                    break;
 
-                    case 'Delete an employee':
-                        deleteEmployee();
-                        break;
+                case 'Delete an employee':
+                    deleteEmployee();
+                    break;
 
-                    case 'Add an employee role':
-                        addEmployeeRole();
-                        break;
+                case 'Add an employee role':
+                    addRole();
+                    break;
 
-                    case 'Add a department':
-                        addDepartment();
-                        break;
-                }
+                case 'Add a department':
+                    addDepartment();
+                    break;
             }
-        })
-    ])
+        }
+    })
+    function viewDepartments() {
+        db.query(`SELECT * FROM department`, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            firstPrompt();
+        });
+    }
+    function viewRole() {
+        db.query(`SELECT * FROM role, department WHERE dept_id = department.id`, (err, res) => {
+            if (err) throw err;
+            console.table(res);
+            firstPrompt();
+        });
+    }
+    function viewAllEmployees() {
+        db.query(`SELECT * FROM employee`,
+            (err, res) => {
+                if (err) throw err;
+                console.table(res);
+                firstPrompt();
+            })
+    }
 }
