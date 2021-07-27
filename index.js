@@ -12,7 +12,7 @@ function firstPrompt() {
     prompt([
         {
             type: 'list',
-            message: 'WWhat would you like to do?',
+            message: 'What would you like to do?',
             name: 'choice',
             choices: [
                 'View all departments',
@@ -34,7 +34,7 @@ function firstPrompt() {
                     break;
 
                 case 'View all employee roles':
-                    viewRole();
+                    viewRoles();
                     break;
 
                 case 'View all employees':
@@ -63,26 +63,23 @@ function firstPrompt() {
             }
         }
     })
-    function viewDepartments() {
-        db.query(`SELECT * FROM department`, (err, res) => {
-            if (err) throw err;
-            console.table(res);
+    async function viewDepartments() {
+        const dept = await db.promise().query(`SELECT * FROM department`)
+        console.table(dept[0]);
             firstPrompt();
-        });
-    }
-    function viewRole() {
-        db.query(`SELECT * FROM role, department WHERE dept_id = department.id`, (err, res) => {
-            if (err) throw err;
-            console.table(res);
-            firstPrompt();
-        });
-    }
-    function viewAllEmployees() {
-        db.query(`SELECT * FROM employee`,
-            (err, res) => {
-                if (err) throw err;
-                console.table(res);
-                firstPrompt();
-            })
+    };
+    // }
+    async function viewRoles() {
+        const roles = await db.promise().query(`SELECT * FROM roles`);
+        console.table(roles[0]);
+        firstPrompt();
+    };
+
+    async function viewAllEmployees() {
+        const allEmp = db.promise().query(`SELECT employee.id, employee.first_name, employee.last_name, roles.title AS title, department.dept_name AS department, roles.salary
+        CONCAT (manager.first_name, " ", manager.last_name) AS manager FROM employee
+        LEFT JOIN employee manager ON manager_id = employee.manager_id`);
+        console.table(allEmp[0]);
+        firstPrompt();
     }
 }
