@@ -1,14 +1,13 @@
-const { prompt } = require('inquirer');
+const inquirer = require('inquirer');
 const db = require('./db/connection');
 
 db.connect(err => {
     if (err) throw err;
     console.log('Connected to the trackman database!');
-    firstPrompt();
 });
 
 function firstPrompt() {
-    prompt([
+    inquirer.prompt([
         {
             type: 'list',
             message: 'What would you like to do?',
@@ -63,35 +62,37 @@ function firstPrompt() {
     })
 
     async function viewDepartments() {
-        const dept = await db.promise().query(`SELECT * FROM department`)
+        const dept = await db.promise().query(`SELECT * FROM departments`)
         console.table(dept[0]);
-            firstPrompt();
+        firstPrompt();
     };
 
     async function viewRoles() {
         const roles = await db.promise().query(`
-        SELECT roles.id, roles.title, department.dept_name AS dept, roles.salary FROM roles
-        LEFT JOIN department ON roles.dept_id = department.id`);
+        SELECT roles.id, roles.title, departments.title AS dept, roles.salary FROM roles
+        LEFT JOIN departments ON roles.department_id = departments.id`);
         console.table(roles[0]);
         firstPrompt();
     };
 
     async function viewAllEmployees() {
-        const allEmp = db.promise().query(`
-        SELECT employee.id, employee.first_name, employee.last_name, roles.title AS title, department.dept_name AS department, roles.salary
-        CONCAT (manager.first_name, " ", manager.last_name) AS manager FROM employee
-        LEFT JOIN employee manager ON manager_id = employee.manager_id`);
-        console.table(allEmp[0]);
+        const employees = await db.promise().query(`
+        SELECT employees.id, employees.first_name, employees.last_name, roles.title AS title, departments.title AS department, roles.salary, 
+        CONCAT (manager.first_name, " ", manager.last_name) AS manager FROM employees
+        LEFT JOIN employees manager ON manager.id = employees.manager_id
+        LEFT JOIN roles ON employees.role_id = roles.id
+        LEFT JOIN departments ON departments.id = roles.department_id`);
+        console.table(employees[0]);
         firstPrompt();
     };
 
     async function addEmployee() {
         const position = await db.promise().query(`SELECT * FROM roles`);
         const mgr = await db.promise().query(`SELECT * FROM employee`);
-        const job = position[0].map((roles) => {
+        const job = position[0].map((role) => {
             return {
-                name: roles.title,
-                value: roles.id
+                name: role.title,
+                value: role.id
             }
         });
 
@@ -102,7 +103,7 @@ function firstPrompt() {
             }
         });
 
-        const newEmp = await prompt([
+        const newEmp = await inquirer.prompt([
             {
                 type: 'input',
                 name: 'first_name',
@@ -127,8 +128,7 @@ function firstPrompt() {
             }
         ]);
 
-        let answer = [newEmp.first_name, newEmp.last_name, newEmp.role, newEmp.manager];
-
+        const answer = [newEmp.first_name, newEmp.last_name, newEmp.role, newEmp.manager];
         await db.promise().query(`INSERT INTO employees(first_name, last_name, role_id, manager_id) VALUES (?,?,?,?)`, answer);
         console.log(`========Employee added to Database========`);
         firstPrompt();
