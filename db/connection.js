@@ -9,6 +9,7 @@ const db = mysql.createConnection(
         password: process.env.DB_PASS,
         database: 'trackman'
     },
+    console.log('Connected to the trackman database!')
 );
 
 module.exports = db;
